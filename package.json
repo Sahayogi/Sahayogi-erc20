@@ -15,6 +15,7 @@
     "openzeppelin-solidity": "^4.3.3"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.3"
+    "@openzeppelin/contracts": "^4.3.3",
+    "ganache-cli": "^6.12.2"
   }
 }
