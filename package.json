@@ -7,15 +7,18 @@
     "test": "test"
   },
   "scripts": {
+    "build-contracts": "sol-merger \"./contracts/*.sol\" ./build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "openzeppelin-solidity": "^4.3.3"
+    "openzeppelin-solidity": "^4.3.3",
+    "sol-merger": "^3.1.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.3",
+    "@poanet/solidity-flattener": "^3.0.6",
     "ganache-cli": "^6.12.2"
   }
 }
