@@ -2,19 +2,17 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract SahayogiToken is ERC20{
-    address public admin;
+contract SahayogiToken is ERC20, AccessControl {
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+
     constructor() ERC20("SahayogiToken", "SYT") {
-        _mint(msg.sender, 1000000*10**18);
-        admin = msg.sender;
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(MINTER_ROLE, msg.sender);
     }
-    
-    function mint(address to, uint amount) external {
-        require(msg.sender == admin,"Only to admin");
-        _mint(to,amount);
-    }
-    
-    
 
+    function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
+        _mint(to, amount);
+    }
 }
