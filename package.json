@@ -15,7 +15,8 @@
   "devDependencies": {
     "@truffle/hdwallet-provider": "^1.7.0",
     "openzeppelin-solidity": "^4.3.3",
-    "sol-merger": "^3.1.0"
+    "sol-merger": "^3.1.0",
+    "truffle-plugin-verify": "^0.5.18"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.3",

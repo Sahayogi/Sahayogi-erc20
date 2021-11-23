@@ -60,6 +60,13 @@ module.exports = {
     // timeout: 100000
   },
 
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+
+  api_keys: {
+    etherscan: 'TBT3X43ZTM3T7H6ZFDQA1EKRW3TY7RSW4J'
+  },
   // Configure your compilers
   compilers: {
     solc: {
