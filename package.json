@@ -13,12 +13,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@truffle/hdwallet-provider": "^1.7.0",
     "openzeppelin-solidity": "^4.3.3",
     "sol-merger": "^3.1.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.3",
     "@poanet/solidity-flattener": "^3.0.6",
+    "dotenv": "^10.0.0",
     "ganache-cli": "^6.12.2"
   }
 }

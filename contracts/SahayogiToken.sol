@@ -7,11 +7,14 @@ contract SahayogiToken is ERC20 {
     address public minter;
 
     constructor() ERC20("SahayogiToken", "SYT") {
+        _mint(msg.sender, 1000000*10**18);
         minter = msg.sender;
     }
 
-    function mint(address to, uint256 amount) public virtual {
+    function mint(address to, uint256 amount) external {
         require(msg.sender == minter, "Not a Minter");
         _mint(to, amount);
     }
 }
+
+  
