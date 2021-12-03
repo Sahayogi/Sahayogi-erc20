@@ -13,14 +13,17 @@ contract ExchangeEthForSahayogiToken {
     }
 
     //adding fallback function 
+    
+    //give ether => get token
     function getTokensAmount() public payable{
-
-        //calculate num of tokens 
-        uint tokenAmount = msg.value*rate;
+       //calculate num of tokens 
+        uint tokenAmount = (msg.value/(10**18))*rate;
         //reuire that exchange has enough tokens
         require(sahayogitoken.balanceOf(address(this))>=tokenAmount,"doesnot have enough tokens to exchange");
         //transfer tokens to users  
         sahayogitoken.transfer(msg.sender, tokenAmount);
     }
+
+    //give token=> get ether 
 
 }
