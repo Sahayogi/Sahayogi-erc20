@@ -13,9 +13,9 @@ contract ExchangeEthForSahayogiToken {
     }
 
     //adding fallback function 
-    
+
     //give ether => get token
-    function getTokensAmount() public payable{
+    function getTokens() public payable{
        //calculate num of tokens 
         uint tokenAmount = (msg.value/(10**18))*rate;
         //reuire that exchange has enough tokens
@@ -25,5 +25,9 @@ contract ExchangeEthForSahayogiToken {
     }
 
     //give token=> get ether 
+
+    function getEther() public {
+        
+    }
 
 }
