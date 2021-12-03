@@ -25,9 +25,10 @@ contract ExchangeEthForSahayogiToken {
         //transfer tokens to users
         sahayogitoken.transfer(msg.sender, tokenAmount);
     }
-
+    // amount 
     //give token=> get ether
     function getEther(uint256 _amount) public {
+        require(sahayogitoken.balanceOf(msg.sender) >= _amount,"doesnot have sufficient token to exchange");
         //calculate amount of ether
         uint256 etherAmount = _amount / rate;
         //must have enough ether
