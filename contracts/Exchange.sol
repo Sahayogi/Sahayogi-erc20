@@ -2,13 +2,15 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "./SahayogiToken.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract ExchangeEthForSahayogiToken {
-    SahayogiToken public sahayogitoken;
-    uint256 public rate = 1;
+contract Exchange {
+    using SafeMath for uint256;
+    SahayogiToken public sahayogiToken;
+    uint256 public rate = 1 ether;
 
-    constructor(SahayogiToken _sahayogitoken) public {
-        sahayogitoken = _sahayogitoken;
+    constructor(SahayogiToken _sahayogiToken) {
+        sahayogiToken = _sahayogiToken;
     }
 
     //adding fallback function
@@ -16,28 +18,32 @@ contract ExchangeEthForSahayogiToken {
     //give ether => get token
     function getTokens() public payable {
         //calculate num of tokens
-        uint256 tokenAmount = (msg.value / (10**18)) * rate;
+        uint256 tokenAmount = msg.value / rate;
         //reuire that exchange has enough tokens
         require(
-            sahayogitoken.balanceOf(address(this)) >= tokenAmount,
+            sahayogiToken.balanceOf(address(this)) >= tokenAmount,
             "doesnot have enough tokens to exchange"
         );
         //transfer tokens to users
-        sahayogitoken.transfer(msg.sender, tokenAmount);
+        sahayogiToken.transfer(msg.sender, tokenAmount);
     }
-    // amount 
+
+    // amount
     //give token=> get ether
     function getEther(uint256 _amount) public {
-        require(sahayogitoken.balanceOf(msg.sender) >= _amount,"doesnot have sufficient token to exchange");
+        require(
+            sahayogiToken.balanceOf(msg.sender) >= _amount,
+            "doesnot have sufficient token to exchange it "
+        );
         //calculate amount of ether
-        uint256 etherAmount = _amount / rate;
+        uint256 etherAmount = _amount * rate;
         //must have enough ether
         require(
             address(this).balance >= etherAmount,
             "doesnot have enough ether"
         );
-        sahayogitoken.transferFrom(msg.sender, address(this), _amount);
+        sahayogiToken.transferFrom(msg.sender, address(this), _amount);
         //sends ether to person calling this func
-        msg.sender.transfer(etherAmount);
+        payable(msg.sender).transfer(etherAmount);
     }
 }
