@@ -13,6 +13,7 @@ contract SahayogiAgency is AccessControl {
         uint256 totalFunds;
         bytes32 merkleRoot;
     }
+    Project[] public projects; 
 
     address public bank;
 

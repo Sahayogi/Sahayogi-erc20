@@ -16,15 +16,13 @@ contract FundRaising is AccessControl {
         uint32 endAt
     );
     event Cancel(uint256 id);
-    event Pledge(
-        //many user can pledged on same fundraise
+    event Donate(
         uint256 indexed id,
         address indexed caller,
         uint256 amount
     );
     struct RaiseFund {
         bytes32 aidAgency;
-        // address creator;
         //total tokens to be collected
         uint256 goal;
         uint256 pledged;
@@ -51,7 +49,7 @@ contract FundRaising is AccessControl {
         _;
     }
 
-    function create(
+    function createFundRaise(
         bytes32 _aidAgency,
         uint256 _goal,
         uint32 _startAt,
@@ -81,7 +79,7 @@ contract FundRaising is AccessControl {
         emit Cancel(_id);
     }
 
-    function pledge(uint256 _id, uint256 _amount) external {
+    function donate(uint256 _id, uint256 _amount) external {
         RaiseFund storage raiseFund = raiseFunds[_id];
         require(block.timestamp >= raiseFund.startAt, "not started yet");
         require(block.timestamp <= raiseFund.endAt, "finished");
@@ -90,6 +88,6 @@ contract FundRaising is AccessControl {
         pledgedAmount[_id][msg.sender] += _amount;
         erc20.transferFrom(msg.sender, address(this), _amount);
 
-        emit Pledge(_id, msg.sender, _amount);
+        emit Donate(_id, msg.sender, _amount);
     }
 }
