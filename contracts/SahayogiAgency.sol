@@ -16,6 +16,8 @@ contract SahayogiAgency is AccessControl {
     Project[] public projects; 
 
     address public bank;
+    address private fundRaisingContract;
+
 
     // @var : array, holds all running project id
     address[] runningProjectsId;
@@ -35,8 +37,6 @@ contract SahayogiAgency is AccessControl {
     function addBeneficiary() public {}
 
     function addVendor() public {}
-
-    function addProject() public {}
 
     // function addBank() public {}
     function claimAid() public {}

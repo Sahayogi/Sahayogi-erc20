@@ -10,7 +10,7 @@ contract FundRaising is AccessControl {
 
     event Create(
         uint256 id,
-        bytes32 aidAgency,
+        string aidAgency,
         uint256 goal,
         uint32 startAt,
         uint32 endAt
@@ -22,13 +22,14 @@ contract FundRaising is AccessControl {
         uint256 amount
     );
     struct RaiseFund {
-        bytes32 aidAgency;
+        string aidAgency;
         //total tokens to be collected
         uint256 goal;
         uint256 pledged;
         uint32 startAt;
         uint32 endAt;
         bool claimed;
+        bool canceled;
     }
 
     //state
@@ -37,7 +38,7 @@ contract FundRaising is AccessControl {
     uint256 public count;
     mapping(uint256 => RaiseFund) public raiseFunds;
     // RFid=>userAdd=>amount
-    mapping(uint256 => mapping(address => uint256)) public pledgedAmount;
+    mapping(uint256 => mapping(address => uint256)) public donatedAmount;
 
     constructor(SahayogiToken _erc20,address _admin) {
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -50,7 +51,7 @@ contract FundRaising is AccessControl {
     }
 
     function createFundRaise(
-        bytes32 _aidAgency,
+        string calldata _aidAgency,
         uint256 _goal,
         uint32 _startAt,
         uint32 _endAt
@@ -64,7 +65,8 @@ contract FundRaising is AccessControl {
             pledged: 0,
             startAt: _startAt,
             endAt: _endAt,
-            claimed: false
+            claimed: false,
+            canceled: false
         });
         emit Create(count,_aidAgency, _goal, _startAt, _endAt);
     }
@@ -85,7 +87,7 @@ contract FundRaising is AccessControl {
         require(block.timestamp <= raiseFund.endAt, "finished");
 
         raiseFund.pledged += _amount;
-        pledgedAmount[_id][msg.sender] += _amount;
+        donatedAmount[_id][msg.sender] += _amount;
         erc20.transferFrom(msg.sender, address(this), _amount);
 
         emit Donate(_id, msg.sender, _amount);

@@ -6,11 +6,11 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Exchange {
     using SafeMath for uint256;
-    SahayogiToken public sahayogiToken;
+    SahayogiToken public erc20;
     uint256 public rate = 1 ether;
 
-    constructor(SahayogiToken _sahayogiToken) {
-        sahayogiToken = _sahayogiToken;
+    constructor(SahayogiToken _erc20) {
+        erc20 = _erc20;
     }
 
     //adding fallback function
@@ -21,18 +21,18 @@ contract Exchange {
         uint256 tokenAmount = msg.value / rate;
         //reuire that exchange has enough tokens
         require(
-            sahayogiToken.balanceOf(address(this)) >= tokenAmount,
+            erc20.balanceOf(address(this)) >= tokenAmount,
             "doesnot have enough tokens to exchange"
         );
         //transfer tokens to users
-        sahayogiToken.transfer(msg.sender, tokenAmount);
+        erc20.transfer(msg.sender, tokenAmount);
     }
 
     // amount
     //give token=> get ether
     function getEther(uint256 _amount) public {
         require(
-            sahayogiToken.balanceOf(msg.sender) >= _amount,
+            erc20.balanceOf(msg.sender) >= _amount,
             "doesnot have sufficient token to exchange it "
         );
         //calculate amount of ether
@@ -42,7 +42,7 @@ contract Exchange {
             address(this).balance >= etherAmount,
             "doesnot have enough ether"
         );
-        sahayogiToken.transferFrom(msg.sender, address(this), _amount);
+        erc20.transferFrom(msg.sender, address(this), _amount);
         //sends ether to person calling this func
         payable(msg.sender).transfer(etherAmount);
     }
