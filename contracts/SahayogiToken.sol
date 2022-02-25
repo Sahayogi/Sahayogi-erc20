@@ -13,7 +13,6 @@ contract SahayogiToken is ERC20, AccessControl {
     }
     //admin is the owner of erc20 contract
     constructor(address _admin) ERC20("SahayogiToken", "SYT") {
-        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
         _mint(msg.sender, 100000 * 10**decimals());
     }
