@@ -25,7 +25,7 @@ contract FundRaising is AccessControl {
         string aidAgency;
         //total tokens to be collected
         uint256 goal;
-        uint256 pledged;
+        uint256 donated;
         uint32 startAt;
         uint32 endAt;
         bool claimed;
@@ -62,7 +62,7 @@ contract FundRaising is AccessControl {
         raiseFunds[count] = RaiseFund({
             aidAgency: _aidAgency, 
             goal: _goal,
-            pledged: 0,
+            donated: 0,
             startAt: _startAt,
             endAt: _endAt,
             claimed: false,
@@ -86,7 +86,7 @@ contract FundRaising is AccessControl {
         require(block.timestamp >= raiseFund.startAt, "not started yet");
         require(block.timestamp <= raiseFund.endAt, "finished");
 
-        raiseFund.pledged += _amount;
+        raiseFund.donated += _amount;
         donatedAmount[_id][msg.sender] += _amount;
         erc20.transferFrom(msg.sender, address(this), _amount);
 
