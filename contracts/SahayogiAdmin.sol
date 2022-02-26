@@ -93,14 +93,14 @@ contract FundRaising is AccessControl {
 
         emit Donate(_id, msg.sender, _amount);
     }
-    function claim(uint256 _id) public OnlyAdmin{
-        RaiseFund storage raiseFund = raiseFunds[_id];
-        require(block.timestamp > raiseFund.endAt,"not ended");
-        require(raiseFund.donated >= raiseFund.goal,"hasnot reached goal");
-        require(!raiseFund.claimed,"claimed");
-        raiseFund.claimed = true;
-        erc20.transfer(msg.sender,raiseFund.donated);
+    // function claim(uint256 _id) public OnlyAgency{
+    //     RaiseFund storage raiseFund = raiseFunds[_id];
+    //     require(block.timestamp > raiseFund.endAt,"not ended");
+    //     require(raiseFund.donated >= raiseFund.goal,"hasnot reached goal");
+    //     require(!raiseFund.claimed,"claimed");
+    //     raiseFund.claimed = true;
+    //     erc20.transfer(msg.sender,raiseFund.donated);
 
-        emit Claim(_id);
-    }
+    //     emit Claim(_id);
+    // }
 }
