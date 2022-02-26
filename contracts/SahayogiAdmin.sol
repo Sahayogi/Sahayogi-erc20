@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
-
-///manages Rahat Token and projects
 pragma solidity >=0.4.22 <0.9.0;
 
 import "./SahayogiToken.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract FundRaising is AccessControl {
+    event Claim(
+        uint256 id
+    );
 
     event Create(
         uint256 id,
@@ -91,5 +92,15 @@ contract FundRaising is AccessControl {
         erc20.transferFrom(msg.sender, address(this), _amount);
 
         emit Donate(_id, msg.sender, _amount);
+    }
+    function claim(uint256 _id) public OnlyAdmin{
+        RaiseFund storage raiseFund = raiseFunds[_id];
+        require(block.timestamp > raiseFund.endAt,"not ended");
+        require(raiseFund.donated >= raiseFund.goal,"hasnot reached goal");
+        require(!raiseFund.claimed,"claimed");
+        raiseFund.claimed = true;
+        erc20.transfer(msg.sender,raiseFund.donated);
+
+        emit Claim(_id);
     }
 }
