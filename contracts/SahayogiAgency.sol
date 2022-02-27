@@ -12,8 +12,8 @@ contract SahayogiAgency is AccessControl {
 
    event Create(
        uint256 id,
-       string projectName,
-       uint256 totalFunds
+       string projectName
+    //    uint256 totalFunds
    );
    event Update (
        uint256 id,
@@ -23,7 +23,7 @@ contract SahayogiAgency is AccessControl {
     struct Project {
         string  projectName;
         // address[] vendor;
-        uint256 initialFund;
+        // uint256 initialFund;
         uint256 totalFunds;
         // bytes32 merkleRoot;
         bool running;
@@ -44,9 +44,7 @@ contract SahayogiAgency is AccessControl {
         bank = 0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC;
         FundRaisingContract =  FundRaising(_FundRaisingContract); 
        
-        _setupRole(DEFAULT_ADMIN_ROLE,_admin);
-        _setRoleAdmin(AGENCY_ROLE, DEFAULT_ADMIN_ROLE);
-         grantRole(AGENCY_ROLE, msg.sender);   
+        _setupRole(DEFAULT_ADMIN_ROLE,_admin);  
 
          erc20 = _erc20;  
     }
@@ -78,26 +76,27 @@ contract SahayogiAgency is AccessControl {
      }
     function createProject(
       // address[] _vendor,
-        string calldata _projectName,
-        uint256 _totalFunds
+        string calldata _projectName
+        // uint256 _totalFunds
     ) public OnlyAgency {
         count += 1;
         projects[count] = Project({
             projectName:_projectName,
-            initialFund:0,
-            totalFunds:_totalFunds,
+            totalFunds:0,
+            // totalFunds:_totalFunds,
             running: true
         });
-        emit Create(count, _projectName, _totalFunds);
+        emit Create(count, _projectName);
     }
     //project id=>amount
     mapping(uint256=>uint256) public fundedAmount;
     function updateFund( uint256 _id,uint256 _amount) public OnlyAgency {
      Project storage project = projects[_id];
      require(project.running,"Project is not available");
-     project.initialFund += _amount;
+    
+     project.totalFunds += _amount;
      fundedAmount[_id] += _amount;
-     erc20.transfer(address(this),_amount);
+     erc20.transferFrom(msg.sender,address(this),_amount);
 
      emit Update(_id,_amount);
     }
