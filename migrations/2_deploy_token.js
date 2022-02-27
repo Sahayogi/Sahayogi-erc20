@@ -5,11 +5,11 @@ const FundRaising = artifacts.require("FundRaising");
 
 module.exports = async function (deployer) {
   //deploy token 
-  await deployer.deploy(SahayogiToken);
+  await deployer.deploy(SahayogiToken,admin.address);
   const erc20 = await SahayogiToken.deployed()
 
   //deploy Exchange
-  await deployer.deploy(Exchange, erc20.address);
+  await deployer.deploy(Exchange, erc20.address,admin.address);
   const exchange = await Exchange.deployed()
   console.log('exchange:',exchange)
 

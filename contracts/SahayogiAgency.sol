@@ -74,8 +74,8 @@ contract SahayogiAgency is AccessControl {
 
     //FUNCTIONS
     function claimFunds(uint256 _id) public OnlyAgency {
-    //  FundRaisingContract.raiseFunds[_id];
-    }
+         return FundRaisingContract.claim(_id);
+     }
     function createProject(
       // address[] _vendor,
         string calldata _projectName,
