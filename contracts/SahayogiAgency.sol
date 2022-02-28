@@ -2,11 +2,12 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "./SahayogiToken.sol";
-import "./SahayogiAdmin.sol";
+import "./FundRaising.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./interfaces/IMerkleDistributor.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interfaces/IMerkleDistributor.sol";
+
 
 contract SahayogiAgency is AccessControl, IMerkleDistributor {
 
@@ -127,7 +128,7 @@ contract SahayogiAgency is AccessControl, IMerkleDistributor {
     ///@param account account of the claim address
     ///@param amount amount of claim 
     ///@param merkleProof merkleProof for the claim of the account
-    function claim(uint256 productId,uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external  {
+    function claim(uint256 productId,uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
         require(!isClaimed(productId,index), 'MerkleDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
@@ -138,12 +139,12 @@ contract SahayogiAgency is AccessControl, IMerkleDistributor {
         _setClaimed(productId,index);
         IERC20(erc20).transfer(account, amount);
 
-        emit Claimed(index, account, amount);
+        emit Claimed(productId,index, account, amount);
     }
 
     ///@dev look if already claimed or not for the index
     ///@param index index of the token
-    function isClaimed(uint256 productId,uint256 index) public view returns (bool) {
+    function isClaimed(uint256 productId,uint256 index) public view override returns (bool) {
         uint256 claimedWordIndex = index / 256;
         uint256 claimedBitIndex = index % 256;
         uint256 claimedWord = claimedBitMap[productId][claimedWordIndex];
