@@ -21,7 +21,10 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.3",
     "@poanet/solidity-flattener": "^3.0.6",
+    "csv-parser": "^3.0.0",
     "dotenv": "^10.0.0",
-    "ganache-cli": "^6.12.2"
+    "ethers": "^5.5.4",
+    "ganache-cli": "^6.12.2",
+    "typescript": "^4.5.5"
   }
 }
