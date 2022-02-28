@@ -4,23 +4,27 @@ pragma solidity >=0.4.22 <0.9.0;
 import "./SahayogiToken.sol";
 import "./SahayogiAdmin.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./interfaces/IMerkleDistributor.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract SahayogiAgency is AccessControl {
+contract SahayogiAgency is AccessControl, IMerkleDistributor {
 
   bytes32 public constant AGENCY_ROLE = keccak256("AGENCY");
 
    event Create(
-       uint256 id,
+       uint256 projectId,
        string projectName
     //    uint256 totalFunds
    );
    event Update (
-       uint256 id,
+       uint256 projectId,
        uint256 totalFunds
    );
 
     struct Project {
+        
         string  projectName;
         // address[] vendor;
         // uint256 initialFund;
@@ -37,18 +41,29 @@ contract SahayogiAgency is AccessControl {
 
     uint256 public count;
     address public bank;
-
+    //address of token 
     SahayogiToken public erc20;
     
-    constructor(SahayogiToken _erc20, address _FundRaisingContract, address _admin){
+    constructor(
+        SahayogiToken _erc20, 
+        address _FundRaisingContract, 
+        address _admin
+        ){
         bank = 0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC;
         FundRaisingContract =  FundRaising(_FundRaisingContract); 
-       
         _setupRole(DEFAULT_ADMIN_ROLE,_admin);  
 
-         erc20 = _erc20;  
+   erc20 = _erc20;  
     }
-
+    //     constructor(
+    //     bytes32 _merkleRoot,
+    //     address _contract, 
+    //     address _tokenAddress
+    // ) {
+    //     merkleRoot = _merkleRoot;
+    //     token = _tokenAddress;
+    //     // _transferOwnership(_contract);
+    // }
     modifier OnlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "SAHAYOGI: MUST BE ADMIN");
         _;
@@ -71,9 +86,6 @@ contract SahayogiAgency is AccessControl {
     //after funding ends fund nikalnu
 
     //FUNCTIONS
-    function claimFunds(uint256 _id) public OnlyAgency {
-         return FundRaisingContract.claim(_id);
-     }
     function createProject(
       // address[] _vendor,
         string calldata _projectName
@@ -90,15 +102,84 @@ contract SahayogiAgency is AccessControl {
     }
     //project id=>amount
     mapping(uint256=>uint256) public fundedAmount;
-    function updateFund( uint256 _id,uint256 _amount) public OnlyAgency {
-     Project storage project = projects[_id];
-     require(project.running,"Project is not available");
-    
+    function updateFund( uint256 _projectId,uint256 _amount) public OnlyAgency {
+     Project storage project = projects[_projectId];
+     require(project.running,"Project is not available"); 
      project.totalFunds += _amount;
-     fundedAmount[_id] += _amount;
+     fundedAmount[_projectId] += _amount;
      erc20.transferFrom(msg.sender,address(this),_amount);
 
-     emit Update(_id,_amount);
+     emit Update(_projectId,_amount);
+    }
+    
+    function claimFunds(uint256 _id, uint256 _projectId) public OnlyAgency {
+    Project storage project = projects[_projectId];
+     require(project.running,"Project is not available");
+         return FundRaisingContract.claim(_id,_projectId);
+     }
+
+
+   //MERKLEDISTRIBUTOR
+
+
+    // bytes32 public override merkleRoot;
+    // address of token 
+    address public immutable override token;
+    // This is a packed array of booleans for verifying the claims.
+    // mapping(uint256 => uint256) private claimedBitMap;
+      //projectid=>merkle root 
+    mapping(uint256 => bytes32) public merkleRoot;
+    // This is a packed array of booleans for verifying the claims.
+    mapping(uint256 =>mapping(uint256 => uint256)) private claimedBitMap;
+
+
+
+    ///@dev set claim for the given index
+    function _setClaimed(uint256 index) internal {
+        uint256 claimedWordIndex = index / 256;
+        uint256 claimedBitIndex = index % 256;
+        claimedBitMap[claimedWordIndex] = claimedBitMap[claimedWordIndex] | (1 << claimedBitIndex);
+    }
+
+    ///@dev called by the user to claim the token
+    ///@param index sequential index 
+    ///@param account account of the claim address
+    ///@param amount amount of claim 
+    ///@param merkleProof merkleProof for the claim of the account
+    function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
+        require(!isClaimed(index), 'MerkleDistributor: Drop already claimed.');
+
+        // Verify the merkle proof.
+        bytes32 node = keccak256(abi.encodePacked(index, account, amount));
+        require(MerkleProof.verify(merkleProof, merkleRoot, node), 'MerkleDistributor: Invalid proof.');
+
+        // Mark it claimed and send the token.
+        _setClaimed(index);
+        IERC20(token).transfer(account, amount);
+
+        emit Claimed(index, account, amount);
+    }
+
+    ///@dev look if already claimed or not for the index
+    ///@param index index of the token
+    function isClaimed(uint256 index) public view override returns (bool) {
+        uint256 claimedWordIndex = index / 256;
+        uint256 claimedBitIndex = index % 256;
+        uint256 claimedWord = claimedBitMap[claimedWordIndex];
+        uint256 mask = (1 << claimedBitIndex);
+        return claimedWord & mask == mask;
+    }
+
+    // ///@dev update merkle root 
+    // ///@param _newMerkleRoot new merkle root for the distribution
+    // function updateMerkleRoot(bytes32 _newMerkleRoot) external onlyOwner{
+    //     merkleRoot = _newMerkleRoot;
+    // }
+
+    ///@dev called by the owner of the contract to rescue the token from the contract
+    ///@param amount amount of token to withdraw
+    function withdrawToken(uint256 amount) external {
+        IERC20(token).transfer(msg.sender, amount);
     }
    
   
