@@ -9,19 +9,19 @@ contract SahayogiToken is ERC20, AccessControl {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), " MUST BE ADMIN");
         _;
     }
+
     //admin is the owner of erc20 contract
     constructor(address _admin) ERC20("SahayogiToken", "SYT") {
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-        _mint(msg.sender,1000000);
-
+        _mint(msg.sender, 1000000);
     }
-        function decimals() public view virtual override returns (uint8) {
-        return 2;
+
+    function decimals() public view virtual override returns (uint8) {
+        return 0;
     }
 
     //minting
     function mint(address _to, uint256 _amount) public OnlyAdmin {
         _mint(_to, _amount);
     }
- 
 }
