@@ -40,18 +40,23 @@ contract SahayogiAgency is AccessControl, IMerkleDistributor {
 
     uint256 public count;
     address public bank;
-    //address of token 
-    SahayogiToken public erc20;
+    //address of token  
+    // SahayogiToken public token;;
+    address public override token;
+    //projectid=>merkle root 
+    mapping(uint256 => bytes32) public override merkleRoot;
+   
     
     constructor(
-        SahayogiToken _erc20, 
+        // SahayogiToken _erc20, 
+        address _token,
         address _FundRaisingContract, 
         address _admin
         ){
         bank = 0x0A098Eda01Ce92ff4A4CCb7A4fFFb5A43EBC70DC;
         FundRaisingContract =  FundRaising(_FundRaisingContract); 
         _setupRole(DEFAULT_ADMIN_ROLE,_admin);  
-        erc20 = _erc20;  
+        token = _token;  
     }
   
     modifier OnlyAdmin() {
@@ -90,17 +95,6 @@ contract SahayogiAgency is AccessControl, IMerkleDistributor {
         });
         emit Create(count, _projectName);
     }
-    //project id=>amount
-    mapping(uint256=>uint256) public fundedAmount;
-    function updateFund( uint256 _projectId,uint256 _amount) public OnlyAgency {
-     Project storage project = projects[_projectId];
-     require(project.running,"Project is not available"); 
-     project.updatedFunds += _amount;
-     fundedAmount[_projectId] += _amount;
-     erc20.transferFrom(msg.sender,address(this),_amount);
-
-     emit Update(_projectId,_amount);
-    }
     
     function claimFunds(uint256 _id, uint256 _projectId) public OnlyAgency {
     Project storage project = projects[_projectId];
@@ -108,12 +102,9 @@ contract SahayogiAgency is AccessControl, IMerkleDistributor {
          return FundRaisingContract.claim(_id,_projectId);
      }
 
-
    //MERKLEDISTRIBUTOR
 
-   //projectid=>merkle root 
-    mapping(uint256 => bytes32) public merkleRoot;
-    // This is a packed array of booleans for verifying the claims.
+   // This is a packed array of booleans for verifying the claims.
     mapping(uint256 =>mapping(uint256 => uint256)) private claimedBitMap;
 
     ///@dev set claim for the given index
@@ -128,26 +119,26 @@ contract SahayogiAgency is AccessControl, IMerkleDistributor {
     ///@param account account of the claim address
     ///@param amount amount of claim 
     ///@param merkleProof merkleProof for the claim of the account
-    function claim(uint256 productId,uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
-        require(!isClaimed(productId,index), 'MerkleDistributor: Drop already claimed.');
+    function claim(uint256 projectId,uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external override {
+        require(!isClaimed(projectId,index), 'MerkleDistributor: Drop already claimed.');
 
         // Verify the merkle proof.
         bytes32 node = keccak256(abi.encodePacked(index, account, amount));
-        require(MerkleProof.verify(merkleProof,merkleRoot[productId], node), 'MerkleDistributor: Invalid proof.');
+        require(MerkleProof.verify(merkleProof,merkleRoot[projectId], node), 'MerkleDistributor: Invalid proof.');
 
         // Mark it claimed and send the token.
-        _setClaimed(productId,index);
-        IERC20(erc20).transfer(account, amount);
+        _setClaimed(projectId,index);
+        IERC20(token).transfer(account, amount);
 
-        emit Claimed(productId,index, account, amount);
+        emit Claimed(projectId,index, account, amount);
     }
 
     ///@dev look if already claimed or not for the index
     ///@param index index of the token
-    function isClaimed(uint256 productId,uint256 index) public view override returns (bool) {
+    function isClaimed(uint256 projectId,uint256 index) public view override returns (bool) {
         uint256 claimedWordIndex = index / 256;
         uint256 claimedBitIndex = index % 256;
-        uint256 claimedWord = claimedBitMap[productId][claimedWordIndex];
+        uint256 claimedWord = claimedBitMap[projectId][claimedWordIndex];
         uint256 mask = (1 << claimedBitIndex);
         return claimedWord & mask == mask;
     }
@@ -161,7 +152,7 @@ contract SahayogiAgency is AccessControl, IMerkleDistributor {
     ///@dev called by the owner of the contract to rescue the token from the contract
     ///@param amount amount of token to withdraw
     function withdrawToken(uint256 amount) external {
-        IERC20(erc20).transfer(msg.sender, amount);
+        IERC20(token).transfer(msg.sender, amount);
     }
    
   
