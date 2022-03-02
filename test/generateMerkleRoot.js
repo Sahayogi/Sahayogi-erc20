@@ -60,10 +60,10 @@ function generateMerkleProofs() {
                     });
                     data = fs_1.default.readFileSync(filePath);
                     jsonData = JSON.parse(data.toString());
-                    jsonData.forEach(function (element) {
+                    jsonData.forEach(function (parameter) {
                         allUsers.push({
-                            account: element.account,
-                            amount: ethers_1.BigNumber.from(element.amount),
+                            account: parameter.account,
+                            amount: ethers_1.BigNumber.from(parameter.amount),
                         });
                     });
                     tree = new balance_tree_1.default(allUsers);

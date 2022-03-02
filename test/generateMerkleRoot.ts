@@ -25,10 +25,10 @@ async function generateMerkleProofs() {
 
   let data = fs.readFileSync(filePath);
   let jsonData = JSON.parse(data.toString());
-  jsonData.forEach((element) => {
+  jsonData.forEach((parameter: { account: string; amount: BigNumber; }) => {
     allUsers.push({
-      account: element.account,
-      amount: BigNumber.from(element.amount),
+      account: parameter.account,
+      amount: BigNumber.from(parameter.amount),
     });
   });
   let tree: BalanceTree = new BalanceTree(allUsers);
